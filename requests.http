@@ -1,0 +1,46 @@
+// Requests for testing
+
+###
+GET http://localhost:5236/users/1/posts/sss
+
+###
+GET http://localhost:5236/users/11/posts/some-slug
+###
+GET http://localhost:5236/report/2017
+###
+GET http://localhost:5236/files/this/is/a/path
+
+###
+GET http://localhost:5236/search?q=This is my search query&page=1
+
+###
+GET http://localhost:5236/blogs
+
+###
+POST http://localhost:5150/
+Content-Type: application/json
+
+{
+  "name": "Daniel"
+}
+
+###
+DELETE  http://localhost:5236/blogs/1
+
+###
+PUT  http://localhost:5236/blogs/1
+Content-Type: application/json
+
+{
+  "Title": "Blog Number One",
+  "Content": "This is my updated blog"
+}
+
+PUT  http://localhost:5236/blogs/1
+Content-Type: application/json
+X-API-Key: myApiKey
+
+{
+  "Title": "Blog Number One",
+  "Content": "This is my updated blog"
+}
