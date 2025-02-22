@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace UserManagementAPI.Controllers
 {
@@ -22,62 +23,102 @@ namespace UserManagementAPI.Controllers
         [HttpPost("create")]
         public ActionResult<User> CreateUser([FromBody] User user)
         {
-            if (user == null || string.IsNullOrEmpty(user.Name))
+            try
             {
-                return BadRequest("Invalid user data.");
-            }
+                if (user == null || string.IsNullOrEmpty(user.Name))
+                {
+                    return BadRequest("Invalid user data.");
+                }
 
-            user.Id = nextId++;
-            users[user.Id] = user;
-            _logger.LogInformation($"User created with ID: {user.Id}");
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+                user.Id = nextId++;
+                users[user.Id] = user;
+                _logger.LogInformation($"User created with ID: {user.Id}");
+                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user.");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpGet("{id}")]
         public ActionResult<User> GetUser(int id)
         {
-            if (users.TryGetValue(id, out var user))
+            try
             {
-                return user;
+                if (users.TryGetValue(id, out var user))
+                {
+                    return user;
+                }
+                _logger.LogWarning($"User not found with ID: {id}");
+                return NotFound();
             }
-            _logger.LogWarning($"User not found with ID: {id}");
-            return NotFound();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user.");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, [FromBody] User updatedUser)
         {
-            if (updatedUser == null || string.IsNullOrEmpty(updatedUser.Name))
+            try
             {
-                return BadRequest("Invalid user data.");
-            }
+                if (updatedUser == null || string.IsNullOrEmpty(updatedUser.Name))
+                {
+                    return BadRequest("Invalid user data.");
+                }
 
-            if (users.TryGetValue(id, out var user))
-            {
-                user.Name = updatedUser.Name;
-                _logger.LogInformation($"User updated with ID: {id}");
-                return NoContent();
+                if (users.TryGetValue(id, out var user))
+                {
+                    user.Name = updatedUser.Name;
+                    _logger.LogInformation($"User updated with ID: {id}");
+                    return NoContent();
+                }
+                _logger.LogWarning($"User not found with ID: {id}");
+                return NotFound();
             }
-            _logger.LogWarning($"User not found with ID: {id}");
-            return NotFound();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user.");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            if (users.TryRemove(id, out var user))
+            try
             {
-                _logger.LogInformation($"User deleted with ID: {id}");
-                return NoContent();
+                if (users.TryRemove(id, out var user))
+                {
+                    _logger.LogInformation($"User deleted with ID: {id}");
+                    return NoContent();
+                }
+                _logger.LogWarning($"User not found with ID: {id}");
+                return NotFound();
             }
-            _logger.LogWarning($"User not found with ID: {id}");
-            return NotFound();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user.");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpGet]
         public ActionResult<List<User>> GetAllUsers()
         {
-            return users.Values.ToList();
+            try
+            {
+                return users.Values.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving users.");
+                return StatusCode(500, "Internal server error.");
+            }
         }
     }
 }

@@ -16,8 +16,8 @@ builder.Services.AddHttpLogging(logging => {
 
 var app = builder.Build();
 
-app.UseAuthorization();
 app.UseHttpLogging();
+app.UseAuthorization();
 app.UseExceptionHandler("/error");
 app.MapControllers();
 
