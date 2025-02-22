@@ -1,3 +1,6 @@
+using UserManagementAPI.Middleware;
+using UserManagementAPI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +9,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddLogging();
+builder.Services.AddSingleton<ApiCallTrackingService>();
 
 // Add services to the container.
 builder.Services.AddHttpLogging(logging => {
@@ -17,6 +22,7 @@ builder.Services.AddHttpLogging(logging => {
 var app = builder.Build();
 
 app.UseHttpLogging();
+app.UseMiddleware<ApiCallTrackingMiddleware>();
 app.UseAuthorization();
 app.UseExceptionHandler("/error");
 app.MapControllers();

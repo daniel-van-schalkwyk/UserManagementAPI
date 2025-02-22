@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System;
+using UserManagementAPI.Services;
 
 namespace UserManagementAPI.Controllers
 {
@@ -14,10 +15,12 @@ namespace UserManagementAPI.Controllers
         private static ConcurrentDictionary<int, User> users = new ConcurrentDictionary<int, User>();
         private static int nextId = 1;
         private readonly ILogger<UserController> _logger;
+        private readonly ApiCallTrackingService _trackingService;
 
-        public UserController(ILogger<UserController> logger)
+        public UserController(ILogger<UserController> logger, ApiCallTrackingService trackingService)
         {
             _logger = logger;
+            _trackingService = trackingService;
         }
 
         [HttpPost("create")]
@@ -119,6 +122,12 @@ namespace UserManagementAPI.Controllers
                 _logger.LogError(ex, "Error retrieving users.");
                 return StatusCode(500, "Internal server error.");
             }
+        }
+
+        [HttpGet("apicallcounts")]
+        public ActionResult<ConcurrentDictionary<string, int>> GetApiCallCounts()
+        {
+            return _trackingService.GetApiCallCounts();
         }
     }
 }
